@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-center mb-4">Imóveis Disponíveis</h1>
+
+<!-- Formulário de filtros -->
+<form method="GET" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="preco_min" class="form-label">Preço Mínimo</label>
+            <input type="number" class="form-control" id="preco_min" name="preco_min" value="{{ request.args.get('preco_min', '') }}">
+        </div>
+        <div class="col-md-3">
+            <label for="preco_max" class="form-label">Preço Máximo</label>
+            <input type="number" class="form-control" id="preco_max" name="preco_max" value="{{ request.args.get('preco_max', '') }}">
+        </div>
+        <div class="col-md-3">
+            <label for="localizacao" class="form-label">Localização</label>
+            <input type="text" class="form-control" id="localizacao" name="localizacao" value="{{ request.args.get('localizacao', '') }}">
+        </div>
+        <div class="col-md-3">
+            <label for="tipo" class="form-label">Tipo</label>
+            <select class="form-control" id="tipo" name="tipo">
+                <option value="">Todos</option>
+                <option value="Casa" {% if request.args.get('tipo') == 'Casa' %}selected{% endif %}>Casa</option>
+                <option value="Apartamento" {% if request.args.get('tipo') == 'Apartamento' %}selected{% endif %}>Apartamento</option>
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Filtrar</button>
+</form>
+
+<!-- Lista de imóveis -->
+<div class="row">
+    {% for imovel in imoveis %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <img src="{{ url_for('static', filename='images/' + imovel.imagem) }}" class="card-img-top" alt="{{ imovel.titulo }}" onerror="this.src='https://via.placeholder.com/300x200'">
+            <div class="card-body">
+                <h5 class="card-title">{{ imovel.titulo }}</h5>
+                <p class="card-text">{{ imovel.descricao }}</p>
+                <p class="card-text"><strong>R$ {{ imovel.preco }}</strong></p>
+                <p class="card-text">{{ imovel.localizacao }} - {{ imovel.tipo }}</p>
+                <a href="{{ url_for('imovel', id=imovel.id) }}" class="btn btn-primary">Ver Detalhes</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

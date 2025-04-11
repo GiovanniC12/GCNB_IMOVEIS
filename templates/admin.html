@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-center mb-4">Painel de Administração</h1>
+
+<!-- Formulário para adicionar imóvel -->
+<h3>Adicionar Imóvel</h3>
+<form method="POST" class="mb-5">
+    <input type="hidden" name="action" value="create">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="titulo" class="form-label">Título</label>
+            <input type="text" class="form-control" id="titulo" name="titulo" required aria-describedby="tituloHelp">
+            <small id="tituloHelp" class="form-text text-muted">Digite o título do imóvel.</small>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="preco" class="form-label">Preço</label>
+            <input type="number" class="form-control" id="preco" name="preco" required aria-describedby="precoHelp">
+            <small id="precoHelp" class="form-text text-muted">Digite o preço do imóvel (em reais).</small>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="localizacao" class="form-label">Localização</label>
+            <input type="text" class="form-control" id="localizacao" name="localizacao" required aria-describedby="localizacaoHelp">
+            <small id="localizacaoHelp" class="form-text text-muted">Digite a localização do imóvel.</small>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="tipo" class="form-label">Tipo</label>
+            <select class="form-control" id="tipo" name="tipo" required aria-describedby="tipoHelp">
+                <option value="Casa">Casa</option>
+                <option value="Apartamento">Apartamento</option>
+            </select>
+            <small id="tipoHelp" class="form-text text-muted">Selecione o tipo do imóvel.</small>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="imagem" class="form-label">Imagem (nome do arquivo)</label>
+            <input type="text" class="form-control" id="imagem" name="imagem" required aria-describedby="imagemHelp">
+            <small id="imagemHelp" class="form-text text-muted">Digite o nome do arquivo da imagem (ex.: imagem.jpg).</small>
+        </div>
+        <div class="col-md-12 mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <textarea class="form-control" id="descricao" name="descricao" rows="4" required aria-describedby="descricaoHelp"></textarea>
+            <small id="descricaoHelp" class="form-text text-muted">Digite uma descrição detalhada do imóvel.</small>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-success" aria-label="Adicionar imóvel">Adicionar</button>
+</form>
+
+<!-- Lista de imóveis -->
+<h3>Gerenciar Imóveis</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Título</th>
+            <th scope="col">Preço</th>
+            <th scope="col">Localização</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for imovel in imoveis %}
+        <tr>
+            <td>{{ imovel['id'] }}</td>
+            <td>{{ imovel['titulo'] }}</td>
+            <td>R$ {{ imovel['preco'] }}</td>
+            <td>{{ imovel['localizacao'] }}</td>
+            <td>{{ imovel['tipo'] }}</td>
+            <td>
+                <button class="btn btn-warning btn-sm edit-imovel-btn" 
+        data-id="{{ imovel['id']|tojson }}" 
+        data-titulo="{{ imovel['titulo']|default('')|tojson }}" 
+        data-descricao="{{ imovel['descricao']|default('')|tojson }}" 
+        data-preco="{{ imovel['preco']|tojson }}" 
+        data-localizacao="{{ imovel['localizacao']|default('')|tojson }}" 
+        data-tipo="{{ imovel['tipo']|default('')|tojson }}" 
+        data-imagem="{{ imovel['imagem']|default('')|tojson }}" 
+        aria-label="Editar imóvel">Editar</button>
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="id" value="{{ imovel['id'] }}">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?')" aria-label="Excluir imóvel">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Modal para edição -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Imóvel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="id" id="edit-id">
+                    <div class="mb-3">
+                        <label for="edit-titulo" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="edit-titulo" name="titulo" required aria-describedby="edit-tituloHelp">
+                        <small id="edit-tituloHelp" class="form-text text-muted">Digite o título do imóvel.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-preco" class="form-label">Preço</label>
+                        <input type="number" class="form-control" id="edit-preco" name="preco" required aria-describedby="edit-precoHelp">
+                        <small id="edit-precoHelp" class="form-text text-muted">Digite o preço do imóvel (em reais).</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-localizacao" class="form-label">Localização</label>
+                        <input type="text" class="form-control" id="edit-localizacao" name="localizacao" required aria-describedby="edit-localizacaoHelp">
+                        <small id="edit-localizacaoHelp" class="form-text text-muted">Digite a localização do imóvel.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-tipo" class="form-label">Tipo</label>
+                        <select class="form-control" id="edit-tipo" name="tipo" required aria-describedby="edit-tipoHelp">
+                            <option value="Casa">Casa</option>
+                            <option value="Apartamento">Apartamento</option>
+                        </select>
+                        <small id="edit-tipoHelp" class="form-text text-muted">Selecione o tipo do imóvel.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-imagem" class="form-label">Imagem</label>
+                        <input type="text" class="form-control" id="edit-imagem" name="imagem" required aria-describedby="edit-imagemHelp">
+                        <small id="edit-imagemHelp" class="form-text text-muted">Digite o nome do arquivo da imagem (ex.: imagem.jpg).</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-descricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="edit-descricao" name="descricao" rows="4" required aria-describedby="edit-descricaoHelp"></textarea>
+                        <small id="edit-descricaoHelp" class="form-text text-muted">Digite uma descrição detalhada do imóvel.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Fechar modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary" aria-label="Salvar alterações">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
